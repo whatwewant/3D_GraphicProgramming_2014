@@ -1,0 +1,11 @@
+release
+Release
+Debug
+debug
+*.obj
+*.pch
+*.pdb
+*.idb
+*.exe
+*.ilk
+lpk.dll
