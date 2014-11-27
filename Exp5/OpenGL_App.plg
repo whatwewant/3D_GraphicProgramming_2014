@@ -1,0 +1,53 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: OpenGL_App - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\Users\Cole\AppData\Local\Temp\RSP5407.tmp" with contents
+[
+/nologo /MLd /W3 /Gm /GX /ZI /Od /I "../include" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"Debug/OpenGL_App.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
+"C:\Users\Cole\Desktop\3D_GraphicProgramming_2014\Exp5\Camera.cpp"
+"C:\Users\Cole\Desktop\3D_GraphicProgramming_2014\Exp5\ImageLib.cpp"
+"C:\Users\Cole\Desktop\3D_GraphicProgramming_2014\Exp5\main.cpp"
+"C:\Users\Cole\Desktop\3D_GraphicProgramming_2014\Exp5\MathLib.cpp"
+"C:\Users\Cole\Desktop\3D_GraphicProgramming_2014\Exp5\Mesh.cpp"
+]
+Creating command line "cl.exe @C:\Users\Cole\AppData\Local\Temp\RSP5407.tmp" 
+Creating temporary file "C:\Users\Cole\AppData\Local\Temp\RSP5408.tmp" with contents
+[
+kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /incremental:yes /pdb:"Debug/Exp5.pdb" /debug /machine:I386 /out:"../bin/Exp5.exe" /pdbtype:sept /libpath:"../lib" 
+.\Debug\Camera.obj
+.\Debug\ImageLib.obj
+.\Debug\main.obj
+.\Debug\MathLib.obj
+.\Debug\Mesh.obj
+]
+Creating command line "link.exe @C:\Users\Cole\AppData\Local\Temp\RSP5408.tmp"
+<h3>Output Window</h3>
+Compiling...
+Camera.cpp
+c:\users\cole\desktop\3d_graphicprogramming_2014\exp5\camera.cpp(5) : warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+c:\users\cole\desktop\3d_graphicprogramming_2014\exp5\camera.cpp(5) : warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+c:\users\cole\desktop\3d_graphicprogramming_2014\exp5\camera.cpp(7) : warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+c:\users\cole\desktop\3d_graphicprogramming_2014\exp5\camera.cpp(7) : warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+c:\users\cole\desktop\3d_graphicprogramming_2014\exp5\camera.cpp(10) : warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+c:\users\cole\desktop\3d_graphicprogramming_2014\exp5\camera.cpp(10) : warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+c:\users\cole\desktop\3d_graphicprogramming_2014\exp5\camera.cpp(11) : warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+c:\users\cole\desktop\3d_graphicprogramming_2014\exp5\camera.cpp(11) : warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+ImageLib.cpp
+main.cpp
+MathLib.cpp
+Mesh.cpp
+Linking...
+LIBCD.lib(crt0init.obj) : warning LNK4098: defaultlib "libc.lib" conflicts with use of other libs; use /NODEFAULTLIB:library
+
+
+
+<h3>Results</h3>
+Exp5.exe - 0 error(s), 0 warning(s)
+</pre>
+</body>
+</html>
