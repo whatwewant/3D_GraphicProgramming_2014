@@ -105,6 +105,14 @@ SOURCE=.\MathLib.cpp
 
 SOURCE=.\Mesh.cpp
 # End Source File
+# Begin Source File
+
+SOURCE=.\Skybox.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\WaterSurface.cpp
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -124,6 +132,10 @@ SOURCE=.\MathLib.h
 # Begin Source File
 
 SOURCE=.\Mesh.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\WaterSurface.h
 # End Source File
 # End Group
 # Begin Group "Resource Files"
