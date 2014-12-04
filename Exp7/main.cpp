@@ -4,11 +4,13 @@
 #include"Mesh.h"
 #include "ImageLib.h"
 #include "Camera.h"
+#include "ParticleSystem.h"
+#include <mmsystem.h>
+
+#pragma comment (lib, "winmm.lib")
+
 
 bool rotation_mode = false;
-
-CMesh models[4];
-unsigned int model_textures[4]={0, 0, 0, 0}; // 三维模型纹理对象
 
 CMesh ground_model ; // 地面模型
 unsigned int ground_texture = 0; // 地面纹理
@@ -19,9 +21,13 @@ float camera_move_step=0.1f;
 float mouse_sensitivity_x=1.0f;
 float mouse_sensitivity_y=1.0f;
 
+CParticleSystem fireworks; // 焰火
+
+unsigned int current_time;
+
 void GL_init(void) 
 {
-	glClearColor (1.0, 1.0, 1.0, 0.0);
+	glClearColor(0.0, 0.0, 0.0, 0.0);
 
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
@@ -38,19 +44,11 @@ void GL_init(void)
 	glEnable(GL_LIGHT0);
 	glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, 1);
 
-	models[0].CreateBlock(2.0, 1.6, 1.0, 4.0, 2.0, 2.0);
-	models[1].CreateSphere(1.0, 80, 80, 1.0, 1.0);
-	models[2].CreateCylinder(0.5, 2.0, 40, 20, 3.0, 2.0, 1.0);
-	models[3].CreateTorus(0.2, 0.8, 40, 20, 8.0, 2.0);
 	ground_model.CreateRectangle(32.0, 32.0, 32, 32, 16.0, 16.0);
 
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
-	model_textures[0]=Load2DTexture("../textures/wood01.jpg");
-	model_textures[1]=Load2DTexture("../textures/earth.jpg");
-	model_textures[2]=Load2DTexture("../textures/metal01.jpg");
-	model_textures[3]=Load2DTexture("../textures/glass01.jpg");
 	ground_texture=Load2DMipmapTexture("../textures/marble01.jpg");
 
 	glEnable(GL_TEXTURE_2D);
@@ -60,11 +58,17 @@ void GL_init(void)
 
 	camera.Init(CVector3D(15.0, 0.0, 1.0), 
 		CVector3D(0.0, 0.0, 1.0), CVector3D(1.0, 0.0, 0.0));
+
+	fireworks.Init(10000);
+	fireworks.texture=Load2DTransparentTexture
+		("../textures/particle01.jpg", "../textures/particle01a.jpg");
+
+	current_time=timeGetTime();
 }
 
 void GL_cleanup(void) {
-	glDeleteTextures(4, model_textures);
 	glDeleteTextures(1, &ground_texture);
+	glDeleteTextures(1, &fireworks.texture);
 }
 
 void display(void) {
@@ -92,38 +96,33 @@ void display(void) {
 	glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
 	glMaterialf(GL_FRONT, GL_SHININESS, 64.0);
 
+	// 绘制地面
 	glBindTexture(GL_TEXTURE_2D, ground_texture);
 	ground_model.Draw();
 
-	// 绘制其它模型
-	glBindTexture(GL_TEXTURE_2D, model_textures[0]);
-	glPushMatrix();
-	glTranslatef(-4.0f, -4.0f, 0.5f);
-	models[0].Draw();
-	glPopMatrix();
+	// 绘制粒子
+	fireworks.Draw(camera.u, camera.v);
 
-	glBindTexture(GL_TEXTURE_2D, model_textures[1]);
-	glPushMatrix();
-	glTranslatef(4.0f, -4.0f, 1.0f);
-	models[1].Draw();
-	glPopMatrix();
-
-	glBindTexture(GL_TEXTURE_2D, model_textures[2]);
-	glPushMatrix();
-	glTranslatef(4.0f, 4.0f, 1.0f);
-	models[2].Draw();
-	glPopMatrix();
-
-	glBindTexture(GL_TEXTURE_2D, model_textures[3]);
-	glPushMatrix();
-	glTranslatef(-4.0f, 4.0f, 1.0f);
-	glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
-	models[3].Draw();
-	glPopMatrix();
-
-	glFinish ();
+	glFlush ();
 
 	glutSwapBuffers();
+}
+
+void idle(void)
+{
+	unsigned int t=timeGetTime();
+	unsigned int dt=t-current_time;
+	
+	if (dt<20) Sleep(10);
+	else
+	{
+		float fdt=0.001f*(float)dt; // 以秒为单位的流逝时间
+		current_time=t;
+		float emit_rate=1000.0f;  // 单位时间内产生新粒子数量
+		fireworks.Emit((int)(emit_rate*fdt)); // 产生新粒子
+		fireworks.UpdateParticleStates(fdt);  // 更新现有粒子状态
+		glutPostRedisplay();
+	}
 }
 
 void reshape (int w, int h) {
@@ -220,6 +219,7 @@ int main(int argc, char * argv[]) {	glutInit(&argc, argv);
 	glutKeyboardFunc (keyboard);
 	glutMouseFunc (mouse);
 	glutMotionFunc (mouse_motion);
+	glutIdleFunc(idle);
 
 	glutMainLoop();
 

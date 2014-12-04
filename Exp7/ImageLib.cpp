@@ -182,3 +182,46 @@ unsigned int LoadCubemapTexture(
 
 	return itex;
 }
+
+unsigned int Load2DTransparentTexture(const char *color_file_name, 
+	const char *alpha_file_name)
+{
+	// 载入颜色图像和alpha图像
+	CImage color_img, alpha_img;
+	if (!color_img.Load(color_file_name)) return 0;
+	if (!alpha_img.Load(alpha_file_name)) return 0;
+
+	// 检查两幅图像大小是否一样
+	if (color_img.width!=alpha_img.width) return 0;
+	if (color_img.height!=alpha_img.height) return 0;
+	if (color_img.bpp!=3) return 0;
+	if (alpha_img.bpp!=1) return 0;
+
+	// 将两幅图像组合成一幅图像
+	int w=color_img.width;
+	int h=color_img.height;
+	int npixels=w*h;
+	unsigned char *buffer=new unsigned char [npixels*4];
+	for (int i=0; i<npixels; ++i)
+	{
+		buffer[i*4]=color_img.pixels[i*3];
+		buffer[i*4+1]=color_img.pixels[i*3+1];
+		buffer[i*4+2]=color_img.pixels[i*3+2];
+		buffer[i*4+3]=alpha_img.pixels[i];
+	}
+
+	// 将图像载入纹理
+	unsigned int itex;
+	glGenTextures(1, &itex);
+
+	glBindTexture(GL_TEXTURE_2D, itex);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 
+		w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+
+	delete [] buffer;
+	return itex;
+}

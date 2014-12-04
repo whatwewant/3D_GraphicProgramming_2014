@@ -31,6 +31,8 @@ unsigned int LoadCubemapTexture(
 	const char *image_file_left, const char *image_file_right,
 	const char *image_file_up, const char *image_file_down,
 	const char *image_file_front, const char *image_file_back );
+unsigned int Load2DTransparentTexture(const char *color_file_name, 
+	const char *alpha_file_name);
 
 
 #endif
