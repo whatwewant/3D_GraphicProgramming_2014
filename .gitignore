@@ -9,3 +9,7 @@ debug
 *.exe
 *.ilk
 lpk.dll
+*.dll
+*.ncb
+*.opt
+*.plg
