@@ -11,5 +11,3 @@ debug
 lpk.dll
 *.dll
 *.ncb
-*.opt
-*.plg
