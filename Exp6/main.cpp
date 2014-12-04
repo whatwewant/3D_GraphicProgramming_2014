@@ -138,12 +138,22 @@ void display(void) {
 	GLfloat light_pos[4]={10.0, 8.0, 12.0, 0.0};
 	glLightfv(GL_LIGHT0, GL_POSITION, light_pos);
 
-	// 绘制天空盒
+	// 绘制天空盒 2
+	glMatrixMode(GL_TEXTURE);
+	glPushMatrix();
+	glLoadIdentity();
+	glRotatef(-90.0, 1.0, 0.0, 0.0);
+	// 绘制天空盒 1 
 	glEnable(GL_TEXTURE_CUBE_MAP);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, env_texture);
 	DrawSkybox();
 	glDisable(GL_TEXTURE_CUBE_MAP);
 	glEnable(GL_TEXTURE_2D);
+	// 绘制天空盒 2
+	glMatrixMode(GL_TEXTURE);
+	glPopMatrix();
+	glMatrixMode(GL_MODELVIEW);
+
 
 	// 绘制模型
 	GLfloat mat_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
