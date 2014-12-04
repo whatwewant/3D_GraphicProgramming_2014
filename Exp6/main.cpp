@@ -6,6 +6,11 @@
 #include "Camera.h"
 #include "Skybox.h"
 
+#include "WaterSurface.h"
+#include <mmsystem.h>
+#pragma comment (lib, "winmm.lib")
+
+
 bool rotation_mode = false;
 
 CMesh models[4];
@@ -56,6 +61,11 @@ void DrawSkybox(void)
 	// 重新打开深度测试
 	glEnable(GL_DEPTH_TEST);
 }
+
+CWaterSurface water_surface;
+float water_surface_height=-2.0f;
+
+unsigned int current_time;
 
 void GL_init(void) 
 {
@@ -112,6 +122,17 @@ void GL_init(void)
 		"../textures/Skybox01_back.jpg"
 	);
 
+	water_surface.Create(140.0, 140.0, 64, 64);
+	water_surface.plane_waves[0].A=0.4f;
+	water_surface.plane_waves[0].f=0.5f;
+	water_surface.plane_waves[0].Lx_rcp=4.0f/100.0f;
+	water_surface.plane_waves[0].Ly_rcp=0.0f/100.0f;
+	water_surface.plane_waves[1].A=0.1f;
+	water_surface.plane_waves[1].f=1.0f;
+	water_surface.plane_waves[1].Lx_rcp=10.0f/100.0f;
+	water_surface.plane_waves[1].Ly_rcp=10.0f/100.0f;
+
+	current_time=timeGetTime();
 }
 
 void GL_cleanup(void) {
@@ -195,9 +216,60 @@ void display(void) {
 	models[3].Draw();
 	glPopMatrix();
 
-	glFinish ();
+	// 绘制水面
+	glDisable(GL_CULL_FACE);
+	glDepthMask(GL_FALSE);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	GLfloat water_diffuse[] = { 0.7, 0.7, 1.0, 0.8 };
+	GLfloat water_specular[] = { 0.0, 0.0, 0.0, 0.8 };
+	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, water_diffuse);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, water_specular);
+	glMaterialf(GL_FRONT, GL_SHININESS, 64.0);
+
+	glPushMatrix();
+	glTranslatef(0.0, 0.0, water_surface_height);
+	glMatrixMode(GL_TEXTURE);
+	glPushMatrix();
+	glLoadIdentity();
+	glRotatef(-90.0, 1.0, 0.0, 0.0);
+
+	glEnable(GL_TEXTURE_CUBE_MAP);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, env_texture);
+	water_surface.Draw();
+	glDisable(GL_TEXTURE_CUBE_MAP);
+	glEnable(GL_TEXTURE_2D);
+
+	glMatrixMode(GL_TEXTURE);
+	glPopMatrix();
+	glMatrixMode(GL_MODELVIEW);
+	glPopMatrix();
+
+	glDepthMask(GL_TRUE);
+	glDisable(GL_BLEND);
+	glEnable(GL_CULL_FACE);
+
+	glFlush ();
 
 	glutSwapBuffers();
+}
+
+void idle(void)
+{
+	unsigned int t=timeGetTime();
+	unsigned int dt=t-current_time;
+	
+	if (dt<20) Sleep(10);
+	else
+	{
+		current_time=t;
+		water_surface.Animate(0.001*t);
+		CVector3D camera_pos=camera.P0;
+		camera_pos.z-=water_surface_height;
+		water_surface.CalculateReflectionVectors(camera_pos);
+		glutPostRedisplay();
+	}
 }
 
 void reshape (int w, int h) {
@@ -296,6 +368,7 @@ int main(int argc, char * argv[]) {	glutInit(&argc, argv);
 	glutKeyboardFunc (keyboard);
 	glutMouseFunc (mouse);
 	glutMotionFunc (mouse_motion);
+	glutIdleFunc(idle);
 
 	glutMainLoop();
 
