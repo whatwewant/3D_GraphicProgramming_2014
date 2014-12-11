@@ -105,6 +105,10 @@ SOURCE=.\MathLib.cpp
 
 SOURCE=.\Mesh.cpp
 # End Source File
+# Begin Source File
+
+SOURCE=.\ParticleSystem.cpp
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -124,6 +128,10 @@ SOURCE=.\MathLib.h
 # Begin Source File
 
 SOURCE=.\Mesh.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ParticleSystem.h
 # End Source File
 # End Group
 # Begin Group "Resource Files"
