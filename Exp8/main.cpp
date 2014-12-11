@@ -4,11 +4,7 @@
 #include"Mesh.h"
 #include "ImageLib.h"
 #include "Camera.h"
-#include "ParticleSystem.h"
-#include <mmsystem.h>
-
-#pragma comment (lib, "winmm.lib")
-
+#include "Cloth.h"
 
 bool rotation_mode = false;
 
@@ -21,13 +17,39 @@ float camera_move_step=0.1f;
 float mouse_sensitivity_x=1.0f;
 float mouse_sensitivity_y=1.0f;
 
-CParticleSystem fireworks; // 焰火
+float sphere_radius=0.5f;
+CVector3D sphere_center=CVector3D(0.0f, 0.2f*sphere_radius, 1.5f*sphere_radius);
+CMesh sphere_model;
+unsigned int sphere_texture=0;
 
-unsigned int current_time;
+CCloth the_cloth; // 布料
+
+float gravity=9.8f;     // 重力加速度
+float kfriction=0.2f;   // 地面与布料之间的磨擦系数
+float time_step=0.002f; // 时间积分步长
+
+LARGE_INTEGER current_time;
+LARGE_INTEGER current_time2;
+double high_res_period; // 高分辨率计时器周期
+
+void InitCloth(void)
+{
+	unsigned long nx=32, ny=32, i;
+
+	// 释放布料占据的存储空间
+	the_cloth.Release();
+
+	// 初始化布料
+	the_cloth.Create(1.6f, 2.0f, nx, ny, 4, 4,
+		CVector3D(0.0f, 0.0f, sphere_center.z+sphere_radius*2.0f));
+
+	// 固定布料一端
+	for (i=0; i<=nx; ++i) the_cloth.particles[i].fixed=1;
+}
 
 void GL_init(void) 
 {
-	glClearColor(0.0, 0.0, 0.0, 0.0);
+	glClearColor(1.0, 1.0, 1.0, 0.0);
 
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
@@ -56,19 +78,30 @@ void GL_init(void)
 
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-	camera.Init(CVector3D(15.0, 0.0, 1.0), 
+	camera.Init(CVector3D(sphere_radius*5.0f, 0.0, sphere_radius*4.0f), 
 		CVector3D(0.0, 0.0, 1.0), CVector3D(1.0, 0.0, 0.0));
+	camera.LookUp(-20.0f);
 
-	fireworks.Init(10000);
-	fireworks.texture=Load2DTransparentTexture
-		("../textures/particle01.jpg", "../textures/particle01a.jpg");
+	sphere_texture=Load2DTexture("../textures/glass01.jpg");
+	the_cloth.texture=Load2DMipmapTexture("../textures/cloth01.jpg");
 
-	current_time=timeGetTime();
+	sphere_model.CreateSphere(sphere_radius, 40, 40, 6.0f, 3.0f);
+	InitCloth();
+
+	// 获取高分辨率计时器频率
+	LARGE_INTEGER freq;
+	QueryPerformanceFrequency(&freq);
+
+	// 计算高分辨率计时器周期
+	high_res_period=1.0/(double)freq.QuadPart;
+
+	QueryPerformanceCounter(&current_time);
+	QueryPerformanceCounter(&current_time2);
 }
 
 void GL_cleanup(void) {
 	glDeleteTextures(1, &ground_texture);
-	glDeleteTextures(1, &fireworks.texture);
+	glDeleteTextures(1, &the_cloth.texture);
 }
 
 void display(void) {
@@ -100,29 +133,32 @@ void display(void) {
 	glBindTexture(GL_TEXTURE_2D, ground_texture);
 	ground_model.Draw();
 
-	// 绘制粒子
-	fireworks.Draw(camera.u, camera.v);
+	// 绘制球体
+	glBindTexture(GL_TEXTURE_2D, sphere_texture);
+	glPushMatrix();
+	glTranslatef(sphere_center.x, sphere_center.y, sphere_center.z);
+	sphere_model.Draw();
+	glPopMatrix();
+
+	// 绘制布料
+	float mat_specular2[4]={0.0, 0.0, 0.0, 1.0};
+	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, mat_diffuse);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, mat_specular2);
+	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 0.0);
+
+	glBindTexture(GL_TEXTURE_2D, the_cloth.texture);
+
+	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, 1);
+	glDisable(GL_CULL_FACE);
+	the_cloth.Draw();
+	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, 0);
+	glEnable(GL_CULL_FACE);
+
+
 
 	glFlush ();
 
 	glutSwapBuffers();
-}
-
-void idle(void)
-{
-	unsigned int t=timeGetTime();
-	unsigned int dt=t-current_time;
-	
-	if (dt<20) Sleep(10);
-	else
-	{
-		float fdt=0.001f*(float)dt; // 以秒为单位的流逝时间
-		current_time=t;
-		float emit_rate=1000.0f;  // 单位时间内产生新粒子数量
-		fireworks.Emit((int)(emit_rate*fdt)); // 产生新粒子
-		fireworks.UpdateParticleStates(fdt);  // 更新现有粒子状态
-		glutPostRedisplay();
-	}
 }
 
 void reshape (int w, int h) {
@@ -173,8 +209,49 @@ void keyboard (unsigned char key, int x, int y)
 		case 'F':
 			camera.MoveUp(-camera_move_step);
 			glutPostRedisplay(); break;
+		case 'z':
+		case 'Z':
+			InitCloth();
+			glutPostRedisplay(); break;
+
 	}
 
+}
+
+void idle(void)
+{
+	LARGE_INTEGER t, dt;
+	double ddt;
+
+	// 获取当前时间
+	QueryPerformanceCounter(&t);
+
+	// 处理画面更新
+	dt.QuadPart=t.QuadPart-current_time.QuadPart;
+	ddt=high_res_period*(double)dt.QuadPart;
+	if (ddt>0.02)
+	{
+		current_time=t;
+		the_cloth.CalculateVertexAverageNormals();
+		glutPostRedisplay();
+	}
+
+	// 处理布料动画
+	dt.QuadPart=t.QuadPart-current_time2.QuadPart;
+	ddt=high_res_period*(double)dt.QuadPart;
+	if (ddt>time_step)
+	{
+		current_time2=t;
+
+		the_cloth.ResetForces();
+		the_cloth.ApplyGravity(gravity);
+		the_cloth.ApplySpringForces();
+
+		the_cloth.CollisionWithSphere(sphere_center, sphere_radius);
+		the_cloth.CollisionWithGround(0.0f, kfriction, gravity);
+
+		the_cloth.UpdateParticleStates(time_step);
+	}
 }
 
 void mouse(int button, int state, int x, int y) 
@@ -219,7 +296,7 @@ int main(int argc, char * argv[]) {	glutInit(&argc, argv);
 	glutKeyboardFunc (keyboard);
 	glutMouseFunc (mouse);
 	glutMotionFunc (mouse_motion);
-	glutIdleFunc(idle);
+	glutIdleFunc (idle);
 
 	glutMainLoop();
 

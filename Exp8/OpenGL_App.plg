@@ -6,7 +6,13 @@
 --------------------Configuration: OpenGL_App - Win32 Release--------------------
 </h3>
 <h3>Command Lines</h3>
-Creating temporary file "C:\Users\stu\AppData\Local\Temp\RSPD507.tmp" with contents
+Creating temporary file "C:\Users\stu\AppData\Local\Temp\RSPE491.tmp" with contents
+[
+/nologo /ML /W3 /GX /O2 /I "../include" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"Release/OpenGL_App.pch" /YX /Fo"Release/" /Fd"Release/" /FD /c 
+"D:\3D_GraphicProgramming_2014\Exp8\Cloth.cpp"
+]
+Creating command line "cl.exe @C:\Users\stu\AppData\Local\Temp\RSPE491.tmp" 
+Creating temporary file "C:\Users\stu\AppData\Local\Temp\RSPE492.tmp" with contents
 [
 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /incremental:no /pdb:"Release/Exp8.pdb" /machine:I386 /out:"../bin/Exp8.exe" /libpath:"../lib" 
 .\Release\Camera.obj
@@ -15,9 +21,12 @@ kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32
 .\Release\MathLib.obj
 .\Release\Mesh.obj
 .\Release\ParticleSystem.obj
+.\Release\Cloth.obj
 ]
-Creating command line "link.exe @C:\Users\stu\AppData\Local\Temp\RSPD507.tmp"
+Creating command line "link.exe @C:\Users\stu\AppData\Local\Temp\RSPE492.tmp"
 <h3>Output Window</h3>
+Compiling...
+Cloth.cpp
 Linking...
 
 
