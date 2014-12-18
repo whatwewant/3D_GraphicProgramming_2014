@@ -233,8 +233,8 @@ void CCloth::CollisionWithGround(float ground_height, float kfriction, float gra
 			vertices[i].position.z = ground_height + thickness/2.0;
 			particles[i].v.z =0;
 
-			particles[i].v.Normalize();
-			particles[i].F += - kfriction * particles[i].mass * gravity * particles[i].v;
+			// particles[i].v.Normalize();
+			particles[i].F += - kfriction * particles[i].mass * gravity * particles[i].v.Normalize(0);
 		}		
 		
 	}

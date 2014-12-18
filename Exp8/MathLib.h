@@ -39,14 +39,15 @@ public:
 		z *= s;
 	}
 
-	/*
-	void Normalize(void) {
-		CVector3D tmp;
+	
+	CVector3D& Normalize(int) {
+		CVector3D tmp(x, y, z);
 		float s = (float)(1.0 / sqrt(x*x + y*y + z*z));
-		x *= s;
-		y *= s;
-		z *= s;
-	} */
+		tmp.x *= s;
+		tmp.y *= s;
+		tmp.z *= s;
+		return tmp;
+	}
 };
 
 
