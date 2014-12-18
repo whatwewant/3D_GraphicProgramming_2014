@@ -44,8 +44,7 @@ void CCloth::_ApplySpringForces(float k_spring, float c_spring,
 		CVector3D Fd01 = c * VectorDot((particles[springs[i].v1].v - particles[springs[i].v0].v), d) * d;
 		CVector3D Fd10 = -Fd01;
 
-		// 将弹性力和阻尼力累加到粒子上
-		
+		// 将弹性力和阻尼力累加到粒子上		
 		particles[springs[i].v0].F += (Fe01 + Fd01);
 		particles[springs[i].v1].F += (Fe10 + Fd10);
 	}
@@ -198,7 +197,7 @@ void CCloth::ResetForces(void)
 void CCloth::ApplyGravity(float gravity)
 {
 	for (unsigned long i=0; i<num_vertices; ++i)
-		particles[i].F -= particles[i].mass * gravity;
+		particles[i].F.z -= particles[i].mass * gravity;
 }
 
 void CCloth::ApplySpringForces(void)
