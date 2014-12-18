@@ -25,13 +25,29 @@ void CCloth::_ApplySpringForces(float k_spring, float c_spring,
 // num_springs: 弹簧数量
 // springs: 弹簧数组
 {
+	float k = k_spring;
+	float c = c_spring;
 	for (unsigned long i=0; i<num_springs; ++i)
 	{
+		float l0 = springs[i].length0;
+		CVector3D L=vertices[springs[i].v1].position
+					-vertices[springs[i].v0].position;
+		float l = L.Length();
+		CVector3D d = 1.0 / l * L;
+		
+
 		// 计算弹性力
+		CVector3D Fe01 = k * (l-l0) * d;
+		CVector3D Fe10 = -Fe01;
 
 		// 计算阻尼力
+		CVector3D Fd01 = c * VectorDot((particles[springs[i].v1].v - particles[springs[i].v0].v), d) * d;
+		CVector3D Fd10 = -Fd01;
 
 		// 将弹性力和阻尼力累加到粒子上
+		
+		particles[springs[i].v0].F += (Fe01 + Fd01);
+		particles[springs[i].v1].F += (Fe10 + Fd10);
 	}
 }
 
@@ -181,6 +197,8 @@ void CCloth::ResetForces(void)
 
 void CCloth::ApplyGravity(float gravity)
 {
+	for (unsigned long i=0; i<num_vertices; ++i)
+		particles[i].F -= particles[i].mass * gravity;
 }
 
 void CCloth::ApplySpringForces(void)
@@ -192,10 +210,35 @@ void CCloth::ApplySpringForces(void)
 
 void CCloth::CollisionWithSphere(const CVector3D& sphere_center, float sphere_radius)
 {
+	for (unsigned long i=0; i<num_vertices; ++i)
+	{
+		float d = (vertices[i].position - sphere_center).Length();		
+		
+		if (d < sphere_radius + thickness/2.0)
+		{
+			CVector3D n = 1.0 / d * (vertices[i].position - sphere_center);
+			vertices[i].position = sphere_center + (sphere_radius + thickness/2.0 ) * n;
+			particles[i].v -= VectorDot(particles[i].v, n) * n;
+		}
+		
+	}		
 }
 
 void CCloth::CollisionWithGround(float ground_height, float kfriction, float gravity)
 {
+	for (unsigned long i=0; i<num_vertices; ++i)
+	{
+		
+		if (vertices[i].position.z < ground_height + thickness/2.0)
+		{
+			vertices[i].position.z = ground_height + thickness/2.0;
+			particles[i].v.z =0;
+
+			particles[i].v.Normalize();
+			particles[i].F += - kfriction * particles[i].mass * gravity * particles[i].v;
+		}		
+		
+	}
 }
 
 void CCloth::UpdateParticleStates(float dt)
@@ -206,5 +249,7 @@ void CCloth::UpdateParticleStates(float dt)
 		if (particles[i].fixed) continue;
 
 		// 更新粒子速度和位置
+		particles[i].v += dt * particles[i].F / particles[i].mass;
+		vertices[i].position += dt * particles[i].v;
 	}
 }

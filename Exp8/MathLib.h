@@ -39,6 +39,14 @@ public:
 		z *= s;
 	}
 
+	/*
+	void Normalize(void) {
+		CVector3D tmp;
+		float s = (float)(1.0 / sqrt(x*x + y*y + z*z));
+		x *= s;
+		y *= s;
+		z *= s;
+	} */
 };
 
 

@@ -91,6 +91,10 @@ SOURCE=.\Camera.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\Cloth.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\ImageLib.cpp
 # End Source File
 # Begin Source File
@@ -116,6 +120,10 @@ SOURCE=.\ParticleSystem.cpp
 # Begin Source File
 
 SOURCE=.\Camera.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\Cloth.h
 # End Source File
 # Begin Source File
 
